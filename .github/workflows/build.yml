@@ -70,3 +70,24 @@ jobs:
       with:
         name: OpenKey-Build
         path: ArtifactOutput/${{ github.event_name == 'workflow_dispatch' && inputs.configuration || 'Release' }}/${{ github.event_name == 'workflow_dispatch' && inputs.platform || 'x86' }}/
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: OpenKey-Build
+          path: release-package
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: latest
+          name: OpenKey Latest Release
+          body: "This is the latest automated release of OpenKey."
+          files: release-package/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
